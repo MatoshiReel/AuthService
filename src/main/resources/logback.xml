@@ -1,0 +1,29 @@
+<configuration debug="true">
+    <property name="LOG_DIR" value="/Users/maxim/devlogs/reel/authservice"/>
+    <property name="LOG_NAME" value="test"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy.MM.dd HH:mm:ss.SSSS} %logger{26} %-5level %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FOUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${LOG_NAME}.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/${LOG_NAME}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy.MM.dd HH:mm:ss.SSSS} %-5level %logger{26} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FOUT"/>
+    </root>
+</configuration>
