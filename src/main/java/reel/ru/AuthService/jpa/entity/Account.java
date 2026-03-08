@@ -1,10 +1,12 @@
 package reel.ru.AuthService.jpa.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name="accounts")
 @NoArgsConstructor
@@ -18,6 +20,9 @@ public class Account {
 
     @Column(name="password", nullable = false, length=86)
     private String password;
+
+    @Transient
+    private String repeatedPassword;
 
     @Column(name="email", nullable = true, unique = true, length=255)
     private String email;
