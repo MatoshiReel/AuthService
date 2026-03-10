@@ -19,6 +19,7 @@ public class ErrorMessageFactory {
             case Reason.EXISTS -> "%s is already exist.";
             case Reason.NOT_EXISTS -> "%s is not exist.";
             case Reason.NOT_MATCH -> "%s is not match.";
+            case Reason.DECRYPTION -> "Encrypted data is not valid.";
         };
     }
 }

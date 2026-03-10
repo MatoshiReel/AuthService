@@ -9,5 +9,6 @@ public enum Reason {
     GREATER_SIZE,
     EXISTS,
     NOT_EXISTS,
-    NOT_MATCH
+    NOT_MATCH,
+    DECRYPTION
 }

@@ -11,8 +11,8 @@ public class FieldErrorBuilder {
     private Reason reason;
     private String message;
 
-    public FieldErrorBuilder field(String parameter) {
-        this.field = parameter;
+    public FieldErrorBuilder field(String field) {
+        this.field = field;
         return this;
     }
 

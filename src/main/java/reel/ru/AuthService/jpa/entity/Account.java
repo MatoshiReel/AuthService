@@ -18,7 +18,7 @@ public class Account {
     @Column(name="login", nullable = false, unique = true, length=35)
     private String login;
 
-    @Column(name="password", nullable = false, length=86)
+    @Column(name="password", nullable = false, length=97)
     private String password;
 
     @Transient
@@ -35,4 +35,15 @@ public class Account {
 
     @Column(name="recommendation_enabled")
     private Boolean isRecommendationEnabled = false;
+
+    public Account(String login, String password, String email) {
+        this.login = login;
+        this.password = password;
+        this.email = email;
+    }
+
+    @Transient
+    public static AccountBuilder builder() {
+        return new AccountBuilder();
+    }
 }
