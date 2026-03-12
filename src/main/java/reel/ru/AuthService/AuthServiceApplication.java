@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@EnableJpaRepositories({"reel.ru.AuthService.jpa.repository"})
+@EnableJpaRepositories({"reel.ru.AuthService.model.jpa.repository"})
 @SpringBootApplication
 public class AuthServiceApplication {
 

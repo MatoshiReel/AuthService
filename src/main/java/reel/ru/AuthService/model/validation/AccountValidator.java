@@ -1,9 +1,9 @@
 package reel.ru.AuthService.model.validation;
 
 import org.springframework.stereotype.Component;
-import reel.ru.AuthService.jpa.entity.Account;
-import reel.ru.AuthService.jpa.repository.AccountRepository;
-import reel.ru.AuthService.model.encryption.Argon2Hasher;
+import reel.ru.AuthService.model.jpa.entity.Account;
+import reel.ru.AuthService.model.jpa.repository.AccountRepository;
+import reel.ru.AuthService.model.security.encryption.EncoderFactory;
 import reel.ru.AuthService.model.error.ErrorMessageFactory;
 import reel.ru.AuthService.model.error.FieldError;
 import reel.ru.AuthService.model.error.Reason;
@@ -14,15 +14,13 @@ import reel.ru.AuthService.model.error.Reason;
 @Component
 public class AccountValidator implements SwitchableValidator<Account, AccountValidator.Mode> {
     private final AccountRepository accountRepository;
-    private final Argon2Hasher argon2Hasher;
     private static final int LOGIN_MAX_SIZE = 35;
     private static final int LOGIN_MIN_SIZE = 3;
     private static final int PASSWORD_MAX_SIZE = 24;
     private static final int PASSWORD_MIN_SIZE = 6;
 
-    public AccountValidator(AccountRepository accountRepository, Argon2Hasher argon2Hasher) {
+    public AccountValidator(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
-        this.argon2Hasher = argon2Hasher;
     }
 
     @Override
@@ -65,7 +63,7 @@ public class AccountValidator implements SwitchableValidator<Account, AccountVal
     public boolean isPasswordMatches(String login, String password) {
         Account account = accountRepository.findByLogin(login);
         if(account == null) return false;
-        return this.argon2Hasher.matches(password, account.getPassword());
+        return EncoderFactory.getArgon2Encoder().matches(password, account.getPassword());
     }
 
     public enum Parameter {

@@ -1,4 +1,4 @@
-package reel.ru.AuthService.jpa.entity;
+package reel.ru.AuthService.model.jpa.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

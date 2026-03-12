@@ -8,14 +8,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.web.bind.annotation.*;
-import reel.ru.AuthService.jpa.entity.Account;
-import reel.ru.AuthService.jpa.repository.AccountRepository;
-import reel.ru.AuthService.model.encryption.Argon2Hasher;
+import reel.ru.AuthService.model.jpa.entity.Account;
+import reel.ru.AuthService.model.jpa.repository.AccountRepository;
+import reel.ru.AuthService.model.security.encryption.EncoderFactory;
 import reel.ru.AuthService.model.error.ErrorMessageFactory;
 import reel.ru.AuthService.model.error.FieldError;
 import reel.ru.AuthService.model.error.Reason;
 import reel.ru.AuthService.model.parser.JsonParser;
+import reel.ru.AuthService.model.security.token.JwtCreator;
+import reel.ru.AuthService.model.security.token.RSAJwtCreator;
 import reel.ru.AuthService.model.validation.AccountValidator;
+
+import java.security.*;
+import java.util.Base64;
 
 @RestController
 @RequestMapping(path="/auth")
@@ -27,14 +32,16 @@ public class AuthController {
     private String saltAES;
     private final AccountRepository accountRepository;
     private final AccountValidator accountValidator;
+    private final JwtCreator jwtCreator;
 
-    public AuthController(AccountRepository accountRepository, AccountValidator accountValidator) {
+    public AuthController(AccountRepository accountRepository, AccountValidator accountValidator, JwtCreator jwtCreator) {
         this.accountRepository = accountRepository;
         this.accountValidator = accountValidator;
+        this.jwtCreator = jwtCreator;
     }
 
     @PostMapping("/signup")
-    private ResponseEntity<Object> signUp(@RequestBody(required = false) String encryptedAccountData, JsonParser<Account> jsonParser, Argon2Hasher hasher) {
+    private ResponseEntity<Object> signUp(@RequestBody(required = false) String encryptedAccountData, JsonParser<Account> jsonParser) {
         Account account;
         if(encryptedAccountData == null) {
             return ResponseEntity.badRequest().build();
@@ -53,17 +60,37 @@ public class AuthController {
         }
         FieldError fieldError = accountValidator.validate(account, AccountValidator.Mode.SIGN_UP);
         if(fieldError != null) return ResponseEntity.badRequest().body(fieldError);
-        Account newAccount = Account.builder().login(account.getLogin()).password(hasher.hash(account.getPassword())).build();
-        //accountRepository.save(newAccount);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
+        Account newAccount = Account.builder().login(account.getLogin()).password(EncoderFactory.getArgon2Encoder().encode(account.getPassword())).build();
+        accountRepository.save(newAccount);
+        return ResponseEntity.status(HttpStatus.CREATED).body(String.format("Bearer %s", jwtCreator.create(newAccount.getId().toString(), 30L * 86_400_000)));
     }
 
     @PostMapping("/signin")
-    private ResponseEntity<?> signIn(@RequestBody(required = false) Account bodyAccount) {
-        if(bodyAccount == null) {
+    private ResponseEntity<Object> signIn(@RequestBody(required = false) String encryptedAccountData, JsonParser<Account> jsonParser) {
+        Account account;
+        if(encryptedAccountData == null) {
             return ResponseEntity.badRequest().build();
+        } else {
+            String jsonAccountData = null;
+            try {
+                jsonAccountData = Encryptors.delux(this.secretKeyAES, this.saltAES).decrypt(encryptedAccountData);
+                account = jsonParser.parseToObject(jsonAccountData, Account.class);
+            } catch(IllegalArgumentException e) {
+                logger.error("Illegal encrypting data : {}", encryptedAccountData, e);
+                return ResponseEntity.badRequest().body(FieldError.builder().reason(Reason.DECRYPTION).message(ErrorMessageFactory.get(Reason.DECRYPTION)).build());
+            } catch(JsonProcessingException e) {
+                logger.error("JSON parameters don't match the class object being deserialized : {}", jsonAccountData, e);
+                return ResponseEntity.badRequest().build();
+            }
         }
-        return ResponseEntity.badRequest().build();
+        FieldError fieldError = accountValidator.validate(account, AccountValidator.Mode.SIGN_IN);
+        if(fieldError != null) return ResponseEntity.badRequest().body(fieldError);
+        Account savedAccount = accountRepository.findByLogin(account.getLogin());
+        if(!savedAccount.getIs2FaEnabled()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(String.format("Bearer %s", jwtCreator.create(savedAccount.getId().toString(), 30L * 86_400_000)));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PostMapping("/otp/verify")
