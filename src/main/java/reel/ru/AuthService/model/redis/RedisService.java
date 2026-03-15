@@ -22,7 +22,6 @@ public class RedisService {
         this.redisTemplate.afterPropertiesSet();
     }
 
-
     public RedisOperations<String, String> getRedisOperations() {
         return redisTemplate.opsForValue().getOperations();
     }

@@ -14,10 +14,10 @@ import reel.ru.AuthService.model.error.Reason;
 @Component
 public class AccountValidator implements SwitchableValidator<Account, AccountValidator.Mode, FieldRequestError> {
     private final AccountRepository accountRepository;
-    private static final int LOGIN_MAX_SIZE = 35;
-    private static final int LOGIN_MIN_SIZE = 3;
-    private static final int PASSWORD_MAX_SIZE = 24;
-    private static final int PASSWORD_MIN_SIZE = 6;
+    public static final int LOGIN_MAX_SIZE = 35;
+    public static final int LOGIN_MIN_SIZE = 3;
+    public static final int PASSWORD_MAX_SIZE = 24;
+    public static final int PASSWORD_MIN_SIZE = 6;
 
     public AccountValidator(AccountRepository accountRepository) {
         this.accountRepository = accountRepository;

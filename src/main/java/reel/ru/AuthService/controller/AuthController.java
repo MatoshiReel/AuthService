@@ -112,7 +112,7 @@ public class AuthController {
     }
 
     @PostMapping("/otp/verify")
-    private ResponseEntity<Object> otpVerify(@RequestParam("email") String email, @RequestParam("otp") String otp, ParamValidator paramValidator) {
+    private ResponseEntity<Object> otpVerify(@RequestParam("email") String email, @RequestParam("otp") String otp, ParamValidator<String> paramValidator) {
         ParamRequestError error = paramValidator.validate(email, "email");
         if(error == null) error = paramValidator.validate(otp, "otp");
         if(error != null) return ResponseEntity.badRequest().body(error);

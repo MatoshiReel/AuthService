@@ -6,8 +6,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static io.restassured.RestAssured.given;
+
 @SpringBootTest
-public class AuthControllerTests {
+public class AuthControllerTest {
     @BeforeAll
     static void setup() {
         RestAssured.baseURI = "http://127.0.0.1";
@@ -16,5 +18,7 @@ public class AuthControllerTests {
 
     @Test
     @DisplayName("")
-    void testName() {}
+    void testName() {
+        given().when().request("POST", "/auth/signin").then().assertThat().statusCode(404);
+    }
 }

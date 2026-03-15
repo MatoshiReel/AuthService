@@ -1,11 +1,13 @@
 package reel.ru.AuthService.model.security.otp;
 
+import lombok.NonNull;
+
 public class OtpKeyFormatter {
-    public static String format(String id, OtpType format, OtpPurposeType purpose) {
+    public static String format(@NonNull String id, @NonNull OtpType format, @NonNull OtpPurposeType purpose) {
         return String.format("otp:%s:%s:%s", format.name().toLowerCase(), id, purpose.name().toLowerCase());
     }
 
-    public static String formatForAttempts(String id, OtpType format, OtpPurposeType purpose) {
+    public static String formatForAttempts(@NonNull String id, @NonNull OtpType format, @NonNull OtpPurposeType purpose) {
         return String.format("otp:%s:%s:%s:attempts", format.name().toLowerCase(), id, purpose.name().toLowerCase());
     }
 
