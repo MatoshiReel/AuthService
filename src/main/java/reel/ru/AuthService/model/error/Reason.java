@@ -1,7 +1,7 @@
 package reel.ru.AuthService.model.error;
 
 /**
- * The {@code Reason} is an enum, that points on one of the reason of request error.
+ * The {@code Reason} is an enum, that points on one of the reason of 4xx response status.
  */
 public enum Reason {
     EMPTY,

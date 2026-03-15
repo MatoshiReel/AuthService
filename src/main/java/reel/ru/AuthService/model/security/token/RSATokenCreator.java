@@ -15,11 +15,11 @@ import java.util.Base64;
 import java.util.Date;
 
 @Component
-public class RSAJwtCreator implements JwtCreator {
+public class RSATokenCreator implements TokenCreator {
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
     private final PrivateKey privateKey;
 
-    public RSAJwtCreator(@Value("${RSA_JWT_PRIVATE_KEY}") String base64PrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public RSATokenCreator(@Value("${RSA_JWT_PRIVATE_KEY}") String base64PrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(base64PrivateKey));
         this.privateKey = keyFactory.generatePrivate(keySpec);

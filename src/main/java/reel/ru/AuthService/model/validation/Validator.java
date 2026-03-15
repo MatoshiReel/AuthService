@@ -1,14 +1,12 @@
 package reel.ru.AuthService.model.validation;
+
 import reel.ru.AuthService.model.error.RequestError;
 
 /**
- * The {@code SwitchableValidator} provides validation taking
- * into the passed validation mode.
  * @param <T> validated object.
- * @param <M> validation mode.
  * @param <R> returned error type {@link RequestError}, not null if an error was detected during validation process.
  * @see RequestError
  */
-public interface SwitchableValidator<T, M, R extends RequestError> {
-    R validate(T obj, M mode);
+public interface Validator<T, R extends RequestError> {
+    R validate(T obj, String objName);
 }

@@ -6,7 +6,7 @@ public class AccountBuilder {
     private String email;
 
     public AccountBuilder login(String login) {
-        this.login =    login;
+        this.login = login;
         return this;
     }
 

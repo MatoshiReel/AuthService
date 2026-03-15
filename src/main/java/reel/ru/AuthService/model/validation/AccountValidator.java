@@ -1,18 +1,18 @@
 package reel.ru.AuthService.model.validation;
 
 import org.springframework.stereotype.Component;
+import reel.ru.AuthService.model.error.FieldRequestError;
 import reel.ru.AuthService.model.jpa.entity.Account;
 import reel.ru.AuthService.model.jpa.repository.AccountRepository;
 import reel.ru.AuthService.model.security.encryption.EncoderFactory;
 import reel.ru.AuthService.model.error.ErrorMessageFactory;
-import reel.ru.AuthService.model.error.FieldError;
 import reel.ru.AuthService.model.error.Reason;
 
 /**
  * @see SwitchableValidator
  */
 @Component
-public class AccountValidator implements SwitchableValidator<Account, AccountValidator.Mode> {
+public class AccountValidator implements SwitchableValidator<Account, AccountValidator.Mode, FieldRequestError> {
     private final AccountRepository accountRepository;
     private static final int LOGIN_MAX_SIZE = 35;
     private static final int LOGIN_MIN_SIZE = 3;
@@ -24,14 +24,14 @@ public class AccountValidator implements SwitchableValidator<Account, AccountVal
     }
 
     @Override
-    public FieldError validate(Account account, Mode mode) {
-        FieldError fieldError;
-        fieldError = this.validateLogin(account.getLogin());
-        if(fieldError == null) fieldError = this.validatePassword(account.getPassword());
-        if(fieldError == null && mode == Mode.SIGN_UP) fieldError = this.validateRepeatedPassword(account.getPassword(), account.getRepeatedPassword());
-        if(fieldError == null) fieldError = this.validateLoginExisting(account.getLogin(), mode);
-        if(fieldError == null && mode == Mode.SIGN_IN) fieldError = this.validatePasswordMatching(account.getLogin(), account.getPassword());
-        return fieldError;
+    public FieldRequestError validate(Account account, Mode mode) {
+        FieldRequestError fieldRequestError;
+        fieldRequestError = this.validateLogin(account.getLogin());
+        if(fieldRequestError == null) fieldRequestError = this.validatePassword(account.getPassword());
+        if(fieldRequestError == null && mode == Mode.SIGN_UP) fieldRequestError = this.validateRepeatedPassword(account.getPassword(), account.getRepeatedPassword());
+        if(fieldRequestError == null) fieldRequestError = this.validateLoginExisting(account.getLogin(), mode);
+        if(fieldRequestError == null && mode == Mode.SIGN_IN) fieldRequestError = this.validatePasswordMatching(account.getLogin(), account.getPassword());
+        return fieldRequestError;
     }
 
     public boolean isEmpty(String parameter) {
@@ -76,54 +76,54 @@ public class AccountValidator implements SwitchableValidator<Account, AccountVal
         SIGN_UP
     }
 
-    private FieldError validateLogin(String login) {
+    private FieldRequestError validateLogin(String login) {
         String field = "login";
         if(this.isEmpty(login)) {
-            return FieldError.builder().field(field).reason(Reason.EMPTY).message(String.format(ErrorMessageFactory.get(Reason.EMPTY), field)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.EMPTY).message(String.format(ErrorMessageFactory.get(Reason.EMPTY), field)).build();
         } else if(this.isSizeLessThenMin(login, Parameter.LOGIN)) {
-            return FieldError.builder().field(field).reason(Reason.LESS_SIZE).message(String.format(ErrorMessageFactory.get(Reason.LESS_SIZE), field, LOGIN_MIN_SIZE)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.LESS_SIZE).message(String.format(ErrorMessageFactory.get(Reason.LESS_SIZE), field, LOGIN_MIN_SIZE)).build();
         } else if(this.isSizeGreaterThenMax(login, Parameter.LOGIN)) {
-            return FieldError.builder().field(field).reason(Reason.GREATER_SIZE).message(String.format(ErrorMessageFactory.get(Reason.GREATER_SIZE), field, LOGIN_MAX_SIZE)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.GREATER_SIZE).message(String.format(ErrorMessageFactory.get(Reason.GREATER_SIZE), field, LOGIN_MAX_SIZE)).build();
         }
         return null;
     }
 
-    private FieldError validateLoginExisting(String login, Mode mode) {
+    private FieldRequestError validateLoginExisting(String login, Mode mode) {
         String field = "login";
         if(mode == Mode.SIGN_UP && this.isLoginExists(login)) {
-            return FieldError.builder().field(field).reason(Reason.EXISTS).message(String.format(ErrorMessageFactory.get(Reason.EXISTS), field)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.EXISTS).message(String.format(ErrorMessageFactory.get(Reason.EXISTS), field)).build();
         } else if(mode == Mode.SIGN_IN && !this.isLoginExists(login)) {
-            return FieldError.builder().field(field).reason(Reason.NOT_EXISTS).message(String.format(ErrorMessageFactory.get(Reason.NOT_EXISTS), field)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.NOT_EXISTS).message(String.format(ErrorMessageFactory.get(Reason.NOT_EXISTS), field)).build();
         }
         return null;
     }
 
-    private FieldError validatePassword(String password) {
+    private FieldRequestError validatePassword(String password) {
         String field = "password";
         if(this.isEmpty(password)) {
-            return FieldError.builder().field(field).reason(Reason.EMPTY).message(String.format(ErrorMessageFactory.get(Reason.EMPTY), field)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.EMPTY).message(String.format(ErrorMessageFactory.get(Reason.EMPTY), field)).build();
         } else if(this.isSizeLessThenMin(password, Parameter.PASSWORD)) {
-            return FieldError.builder().field(field).reason(Reason.LESS_SIZE).message(String.format(ErrorMessageFactory.get(Reason.LESS_SIZE), field, PASSWORD_MIN_SIZE)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.LESS_SIZE).message(String.format(ErrorMessageFactory.get(Reason.LESS_SIZE), field, PASSWORD_MIN_SIZE)).build();
         } else if(this.isSizeGreaterThenMax(password, Parameter.PASSWORD)) {
-            return FieldError.builder().field(field).reason(Reason.GREATER_SIZE).message(String.format(ErrorMessageFactory.get(Reason.GREATER_SIZE), field, PASSWORD_MAX_SIZE)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.GREATER_SIZE).message(String.format(ErrorMessageFactory.get(Reason.GREATER_SIZE), field, PASSWORD_MAX_SIZE)).build();
         }
         return null;
     }
 
-    private FieldError validatePasswordMatching(String login, String password) {
+    private FieldRequestError validatePasswordMatching(String login, String password) {
         String field = "password";
         if(!this.isPasswordMatches(login, password)) {
-            return FieldError.builder().field(field).reason(Reason.NOT_MATCH).message(String.format(ErrorMessageFactory.get(Reason.NOT_MATCH), field)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.NOT_MATCH).message(String.format(ErrorMessageFactory.get(Reason.NOT_MATCH), field)).build();
         }
         return null;
     }
 
-    private FieldError validateRepeatedPassword(String password, String repeatedPassword) {
+    private FieldRequestError validateRepeatedPassword(String password, String repeatedPassword) {
         String field = "repeatedPassword";
         if(this.isEmpty(repeatedPassword)) {
-            return FieldError.builder().field(field).reason(Reason.EMPTY).message(String.format(ErrorMessageFactory.get(Reason.EMPTY), field)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.EMPTY).message(String.format(ErrorMessageFactory.get(Reason.EMPTY), field)).build();
         } else if(!this.isMatch(password, repeatedPassword)) {
-            return FieldError.builder().field(field).reason(Reason.NOT_MATCH).message(String.format(ErrorMessageFactory.get(Reason.NOT_MATCH), field)).build();
+            return FieldRequestError.builder().field(field).reason(Reason.NOT_MATCH).message(String.format(ErrorMessageFactory.get(Reason.NOT_MATCH), field)).build();
         }
         return null;
     }

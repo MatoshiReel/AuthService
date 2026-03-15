@@ -1,15 +1,15 @@
 package reel.ru.AuthService.model.error;
 
 /**
- * The {@code ErrorMessageFactory} is a factory class, that standardized messages for {@link FieldError} message parameter.
- * @see FieldError
+ * The {@code ErrorMessageFactory} is a factory class, that standardized messages for {@link RequestError} message field.
+ * @see RequestError
  */
 public class ErrorMessageFactory {
     /**
      * @param reason one of a {@link Reason} enum value.
-     * @return unformatted {@link String} message for {@link FieldError}.
+     * @return unformatted {@link String} message for {@link RequestError}.
      * @see Reason
-     * @see FieldError
+     * @see RequestError
      */
     public static String get(Reason reason) {
         return switch(reason) {

@@ -28,13 +28,13 @@ public class Account {
     private String email;
 
     @Column(name="2fa_enabled")
-    private Boolean is2FaEnabled = false;
+    private final Boolean is2FaEnabled = false;
 
     @Column(name="searching_history_enabled")
-    private Boolean isSearchingHistoryEnabled = false;
+    private final Boolean isSearchingHistoryEnabled = false;
 
     @Column(name="recommendation_enabled")
-    private Boolean isRecommendationEnabled = false;
+    private final Boolean isRecommendationEnabled = false;
 
     public Account(String login, String password, String email) {
         this.login = login;
