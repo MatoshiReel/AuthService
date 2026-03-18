@@ -10,5 +10,6 @@ public enum Reason {
     EXISTS,
     NOT_EXISTS,
     NOT_MATCH,
-    DECRYPTION
+    DECRYPTION,
+    JSON_FORMAT
 }

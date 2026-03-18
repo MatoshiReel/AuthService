@@ -2,15 +2,17 @@ package reel.ru.AuthService.unit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import reel.ru.AuthService.model.error.FieldRequestError;
 import reel.ru.AuthService.model.error.Reason;
 import reel.ru.AuthService.model.jpa.entity.Account;
+import reel.ru.AuthService.model.jpa.repository.AccountRepository;
 import reel.ru.AuthService.model.parser.JsonParser;
+import reel.ru.AuthService.model.security.encryption.EncoderFactory;
 import reel.ru.AuthService.model.validation.AccountValidator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -21,10 +23,14 @@ public class AccountValidatorTest {
     private AccountValidator validator;
     @Autowired
     private JsonParser<Account> jsonParser;
-    @Value("${TEST_ACCOUNT_LOGIN}")
-    private String testAccountExistingLogin;
-    @Value("${TEST_ACCOUNT_PASSWORD}")
-    private String testAccountPassword;
+    private static Account testAccount;
+    private static final String testAccountPassword = "123456";
+
+    @BeforeAll
+    static void setup(@Autowired AccountRepository accountRepository) {
+        testAccount = Account.builder().login("TestLogin").password(EncoderFactory.getArgon2Encoder().encode(testAccountPassword)).build();
+        accountRepository.save(testAccount);
+    }
 
     @Test
     @DisplayName("Validate account with null login.")
@@ -123,7 +129,7 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login, valid password and valid repeated password, but existing login for sign up mode.")
     public void validateAccountWithExistingLoginForSignUpMode() throws JsonProcessingException {
-        String json = String.format("{\"login\":\"%s\",\"password\":\"%s\",\"repeatedPassword\":\"%s\"}", testAccountExistingLogin, testAccountPassword, testAccountPassword);
+        String json = String.format("{\"login\":\"%s\",\"password\":\"%s\",\"repeatedPassword\":\"%s\"}", testAccount.getLogin(), testAccountPassword, testAccountPassword);
         Account account = jsonParser.parseToObject(json, Account.class);
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
@@ -134,7 +140,7 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login, valid password and valid repeated password for sign up mode.")
     public void validateAccountWithValidParametersForSignUpMode() throws JsonProcessingException {
-        String json = String.format("{\"login\":\"%s\",\"password\":\"%s\",\"repeatedPassword\":\"%s\"}", String.format("%Sasdfb", testAccountExistingLogin), testAccountPassword, testAccountPassword);
+        String json = String.format("{\"login\":\"%s\",\"password\":\"%s\",\"repeatedPassword\":\"%s\"}", String.format("%Sasdfb", testAccount.getLogin()), testAccountPassword, testAccountPassword);
         Account account = jsonParser.parseToObject(json, Account.class);
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.nullValue());
@@ -143,7 +149,7 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login and valid password, but login not exists for sign in mode.")
     public void validateAccountWithNotExistingLoginForSignInMode() {
-        Account account = Account.builder().login(String.format("%Sasdfb", testAccountExistingLogin)).password(testAccountPassword).build();
+        Account account = Account.builder().login(String.format("%Sasdfb", testAccount.getLogin())).password(testAccountPassword).build();
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_EXISTS));
@@ -153,7 +159,7 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login and valid password, but not matched password for sign in mode.")
     public void validateAccountWithNotMatchedPasswordForSignInMode() {
-        Account account = Account.builder().login(testAccountExistingLogin).password(String.format("%Sasdfb", testAccountPassword)).build();
+        Account account = Account.builder().login(testAccount.getLogin()).password(String.format("%Sasdfb", testAccountPassword)).build();
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_MATCH));
@@ -163,7 +169,7 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login and valid password for sign in mode.")
     public void validateAccountWithValidParametersForSignInMode() {
-        Account account = Account.builder().login(testAccountExistingLogin).password(testAccountPassword).build();
+        Account account = Account.builder().login(testAccount.getLogin()).password(testAccountPassword).build();
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.nullValue());
     }
