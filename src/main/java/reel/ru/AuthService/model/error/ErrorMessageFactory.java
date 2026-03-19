@@ -14,6 +14,7 @@ public class ErrorMessageFactory {
     public static String get(Reason reason) {
         return switch(reason) {
             case Reason.EMPTY -> "%s is empty or null.";
+            case Reason.PATTERN -> "%s can only consist this characters: %s";
             case Reason.LESS_SIZE -> "%s size is less then min possible size %d.";
             case Reason.GREATER_SIZE -> "%s size is greater then max possible size %d.";
             case Reason.EXISTS -> "%s is already exist.";

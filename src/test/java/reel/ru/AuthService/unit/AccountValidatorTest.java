@@ -1,6 +1,5 @@
 package reel.ru.AuthService.unit;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +10,7 @@ import reel.ru.AuthService.model.error.FieldRequestError;
 import reel.ru.AuthService.model.error.Reason;
 import reel.ru.AuthService.model.jpa.entity.Account;
 import reel.ru.AuthService.model.jpa.repository.AccountRepository;
-import reel.ru.AuthService.model.parser.JsonParser;
+import reel.ru.AuthService.model.parser.GsonFactory;
 import reel.ru.AuthService.model.security.encryption.EncoderFactory;
 import reel.ru.AuthService.model.validation.AccountValidator;
 
@@ -22,7 +21,7 @@ public class AccountValidatorTest {
     @Autowired
     private AccountValidator validator;
     @Autowired
-    private JsonParser<Account> jsonParser;
+    private GsonFactory gsonFactory;
     private static Account testAccount;
     private static final String testAccountPassword = "123456";
 
@@ -39,6 +38,16 @@ public class AccountValidatorTest {
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.EMPTY));
+        assertThat(error.getField(), Matchers.equalTo("login"));
+    }
+
+    @Test
+    @DisplayName("Validate account with invalid pattern of login.")
+    public void validateAccountWithInvalidPatternOfLogin() {
+        Account account = Account.builder().login(" Lo-gin&^%$").build();
+        FieldRequestError error = validator.validate(account, null);
+        assertThat(error, Matchers.notNullValue());
+        assertThat(error.getReason(), Matchers.equalTo(Reason.PATTERN));
         assertThat(error.getField(), Matchers.equalTo("login"));
     }
 
@@ -79,6 +88,16 @@ public class AccountValidatorTest {
     }
 
     @Test
+    @DisplayName("Validate account with valid login and invalid pattern of login.")
+    public void validateAccountWithInvalidPatternOfPassword() {
+        Account account = Account.builder().login("12345").password(" 24Lo-gin&^%$  _").build();
+        FieldRequestError error = validator.validate(account, null);
+        assertThat(error, Matchers.notNullValue());
+        assertThat(error.getReason(), Matchers.equalTo(Reason.PATTERN));
+        assertThat(error.getField(), Matchers.equalTo("password"));
+    }
+
+    @Test
     @DisplayName("Validate account with valid login and less size password.")
     public void validateAccountWithLessSizePassword() {
         StringBuilder password = new StringBuilder();
@@ -106,9 +125,9 @@ public class AccountValidatorTest {
 
     @Test
     @DisplayName("Validate account with valid login, valid password and null repeated password for sign up mode.")
-    public void validateAccountWithNullRepeatedPasswordForSignUpMode() throws JsonProcessingException {
+    public void validateAccountWithNullRepeatedPasswordForSignUpMode() {
         String json = "{\"login\":\"12345\",\"password\":\"1234567890\",\"repeatedPassword\":null}";
-        Account account = jsonParser.parseToObject(json, Account.class);
+        Account account = gsonFactory.get().fromJson(json, Account.class);
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.EMPTY));
@@ -117,9 +136,9 @@ public class AccountValidatorTest {
 
     @Test
     @DisplayName("Validate account with valid login, valid password and not matched repeated password for sign up mode.")
-    public void validateAccountWithNotMatchRepeatedPasswordForSignUpMode() throws JsonProcessingException {
+    public void validateAccountWithNotMatchRepeatedPasswordForSignUpMode() {
         String json = "{\"login\":\"12345\",\"password\":\"1234567890\",\"repeatedPassword\":\"0987654321\"}";
-        Account account = jsonParser.parseToObject(json, Account.class);
+        Account account = gsonFactory.get().fromJson(json, Account.class);
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_MATCH));
@@ -128,9 +147,9 @@ public class AccountValidatorTest {
 
     @Test
     @DisplayName("Validate account with valid login, valid password and valid repeated password, but existing login for sign up mode.")
-    public void validateAccountWithExistingLoginForSignUpMode() throws JsonProcessingException {
+    public void validateAccountWithExistingLoginForSignUpMode() {
         String json = String.format("{\"login\":\"%s\",\"password\":\"%s\",\"repeatedPassword\":\"%s\"}", testAccount.getLogin(), testAccountPassword, testAccountPassword);
-        Account account = jsonParser.parseToObject(json, Account.class);
+        Account account = gsonFactory.get().fromJson(json, Account.class);
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.EXISTS));
@@ -139,9 +158,9 @@ public class AccountValidatorTest {
 
     @Test
     @DisplayName("Validate account with valid login, valid password and valid repeated password for sign up mode.")
-    public void validateAccountWithValidParametersForSignUpMode() throws JsonProcessingException {
+    public void validateAccountWithValidParametersForSignUpMode() {
         String json = String.format("{\"login\":\"%s\",\"password\":\"%s\",\"repeatedPassword\":\"%s\"}", String.format("%Sasdfb", testAccount.getLogin()), testAccountPassword, testAccountPassword);
-        Account account = jsonParser.parseToObject(json, Account.class);
+        Account account = gsonFactory.get().fromJson(json, Account.class);
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.nullValue());
     }

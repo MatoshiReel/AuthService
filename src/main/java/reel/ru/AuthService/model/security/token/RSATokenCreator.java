@@ -2,7 +2,6 @@ package reel.ru.AuthService.model.security.token;
 
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +15,6 @@ import java.util.Date;
 
 @Component
 public class RSATokenCreator implements TokenCreator {
-    private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
     private final PrivateKey privateKey;
 
     public RSATokenCreator(@Value("${RSA_JWT_PRIVATE_KEY}") String base64PrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -28,11 +26,11 @@ public class RSATokenCreator implements TokenCreator {
     @Override
     public String create(String id, long expiredTimeMillis) {
         return Jwts.builder()
-                .setSubject(id)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+expiredTimeMillis))
-                .setIssuer("reel-server*")
-                .signWith(privateKey, signatureAlgorithm)
+                .subject(id)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis()+expiredTimeMillis))
+                .issuer("reel-server*")
+                .signWith(privateKey, Jwts.SIG.RS256)
                 .compact();
     }
 }

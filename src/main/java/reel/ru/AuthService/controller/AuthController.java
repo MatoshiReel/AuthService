@@ -1,6 +1,6 @@
 package reel.ru.AuthService.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.gson.JsonSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import reel.ru.AuthService.model.error.*;
 import reel.ru.AuthService.model.jpa.entity.Account;
 import reel.ru.AuthService.model.jpa.repository.AccountRepository;
+import reel.ru.AuthService.model.parser.GsonFactory;
 import reel.ru.AuthService.model.redis.RedisService;
 import reel.ru.AuthService.model.security.encryption.EncoderFactory;
-import reel.ru.AuthService.model.parser.JsonParser;
 import reel.ru.AuthService.model.security.otp.OtpGenerator;
 import reel.ru.AuthService.model.security.otp.OtpKeyFormatter;
 import reel.ru.AuthService.model.security.otp.OtpMailSender;
@@ -22,9 +22,9 @@ import reel.ru.AuthService.model.security.token.TokenCreator;
 import reel.ru.AuthService.model.validation.AccountValidator;
 import reel.ru.AuthService.model.validation.ParamValidator;
 
-import javax.crypto.KeyGenerator;
 import java.security.*;
 import java.time.Duration;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(path="/auth")
@@ -51,7 +51,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/signup", consumes = MediaType.TEXT_PLAIN_VALUE)
-    private ResponseEntity<Object> signUp(@RequestBody(required = false) String encryptedAccountData, JsonParser<Account> jsonParser) {
+    private ResponseEntity<Object> signUp(@RequestBody(required = false) String encryptedAccountData, GsonFactory gsonFactory) {
         Account account;
         if(encryptedAccountData == null) {
             return ResponseEntity.badRequest().build();
@@ -59,12 +59,12 @@ public class AuthController {
             String jsonAccountData = null;
             try {
                 jsonAccountData = Encryptors.delux(this.secretKeyAES, this.saltAES).decrypt(encryptedAccountData);
-                account = jsonParser.parseToObject(jsonAccountData, Account.class);
+                account = gsonFactory.get().fromJson(jsonAccountData, Account.class);
             } catch(IllegalArgumentException | IllegalStateException e) {
-                logger.error("url: auth/signup, Illegal encrypting data : {}", encryptedAccountData, e);
+                logger.warn("url: auth/signup, Illegal encrypting data : {}", encryptedAccountData, e);
                 return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(RequestError.builder().reason(Reason.DECRYPTION).message(ErrorMessageFactory.get(Reason.DECRYPTION)).build());
-            } catch(JsonProcessingException e) {
-                logger.error("url: auth/signup, JSON parameters don't match the class object being deserialized : {}", jsonAccountData, e);
+            } catch(JsonSyntaxException e) {
+                logger.warn("url: auth/signup, JSON parameters don't match the class object being deserialized : {}", jsonAccountData, e);
                 return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(RequestError.builder().reason(Reason.JSON_FORMAT).message(ErrorMessageFactory.get(Reason.JSON_FORMAT)).build());
             }
         }
@@ -76,7 +76,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/signin", consumes = MediaType.TEXT_PLAIN_VALUE)
-    private ResponseEntity<Object> signIn(@RequestBody(required = false) String encryptedAccountData, JsonParser<Account> jsonParser, RedisService redisService) {
+    private ResponseEntity<Object> signIn(@RequestBody(required = false) String encryptedAccountData, GsonFactory gsonFactory, RedisService redisService) {
         Account account;
         if(encryptedAccountData == null) {
             return ResponseEntity.badRequest().build();
@@ -84,12 +84,12 @@ public class AuthController {
             String jsonAccountData = null;
             try {
                 jsonAccountData = Encryptors.delux(this.secretKeyAES, this.saltAES).decrypt(encryptedAccountData);
-                account = jsonParser.parseToObject(jsonAccountData, Account.class);
+                account = gsonFactory.get().fromJson(jsonAccountData, Account.class);
             } catch(IllegalArgumentException | IllegalStateException e) {
-                logger.error("url: auth/signin, Illegal encrypting data : {}", encryptedAccountData, e);
+                logger.warn("url: auth/signin, Illegal encrypting data : {}", encryptedAccountData, e);
                 return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(RequestError.builder().reason(Reason.DECRYPTION).message(ErrorMessageFactory.get(Reason.DECRYPTION)).build());
-            } catch(JsonProcessingException e) {
-                logger.error("url: auth/signin, JSON parameters don't match the class object being deserialized : {}", jsonAccountData, e);
+            } catch(JsonSyntaxException e) {
+                logger.warn("url: auth/signin, JSON parameters don't match the class object being deserialized : {}", jsonAccountData, e);
                 return ResponseEntity.badRequest().contentType(MediaType.APPLICATION_JSON).body(RequestError.builder().reason(Reason.JSON_FORMAT).message(ErrorMessageFactory.get(Reason.JSON_FORMAT)).build());
             }
         }
@@ -103,7 +103,7 @@ public class AuthController {
             String email = savedAccount.getEmail();
             if(email != null) {
                 otpMailSender.send(email, otp);
-                redisService.getRedisOperations().opsForValue().set(OtpKeyFormatter.format(email, OtpKeyFormatter.OtpType.EMAIL, OtpKeyFormatter.OtpPurposeType.SIGN_IN), EncoderFactory.getArgon2Encoder().encode(otp), otpExpiredTimeMinutes);
+                redisService.getRedisOperations().opsForValue().set(OtpKeyFormatter.format(email, OtpKeyFormatter.OtpType.EMAIL, OtpKeyFormatter.OtpPurposeType.SIGN_IN), Objects.requireNonNull(EncoderFactory.getArgon2Encoder().encode(otp)), otpExpiredTimeMinutes);
                 redisService.getRedisOperations().opsForValue().set(OtpKeyFormatter.formatForAttempts(email, OtpKeyFormatter.OtpType.EMAIL, OtpKeyFormatter.OtpPurposeType.SIGN_IN), String.valueOf(0), otpExpiredTimeMinutes);
                 return ResponseEntity.status(HttpStatus.ACCEPTED).contentType(MediaType.TEXT_PLAIN).body(email);
             } else {
@@ -139,7 +139,7 @@ public class AuthController {
     //TODO
     @ResponseBody
     @GetMapping("/encrypt")
-    private String encrypt(@RequestBody String data) throws NoSuchAlgorithmException {
+    private String encrypt(@RequestBody String data) {
         return Encryptors.delux(this.secretKeyAES, this.saltAES).encrypt(data);
     }
 

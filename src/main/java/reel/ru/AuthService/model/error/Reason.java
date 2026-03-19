@@ -5,6 +5,7 @@ package reel.ru.AuthService.model.error;
  */
 public enum Reason {
     EMPTY,
+    PATTERN,
     LESS_SIZE,
     GREATER_SIZE,
     EXISTS,
