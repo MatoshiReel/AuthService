@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.parser;
+package reel.ru.AuthService.service.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.error;
+package reel.ru.AuthService.service.error;
 
 /**
  * The {@code Reason} is an enum, that points on one of the reason of 4xx response status.

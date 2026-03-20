@@ -12,7 +12,7 @@
 	<artifactId>AuthService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>AuthService</name>
-	<description>AuthService used to create user account, login and confirm by OTP-code if it&apos;s enable</description>
+	<description>user authentication and registration in the Reel app</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -110,6 +110,26 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.5.32</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Documentation -->
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.0.2</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>tools.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>3.1.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.21.1</version>
 			<scope>compile</scope>
 		</dependency>
 

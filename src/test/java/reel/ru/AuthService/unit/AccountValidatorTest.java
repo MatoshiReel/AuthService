@@ -6,13 +6,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import reel.ru.AuthService.model.error.FieldRequestError;
-import reel.ru.AuthService.model.error.Reason;
-import reel.ru.AuthService.model.jpa.entity.Account;
-import reel.ru.AuthService.model.jpa.repository.AccountRepository;
-import reel.ru.AuthService.model.parser.GsonFactory;
-import reel.ru.AuthService.model.security.encryption.EncoderFactory;
-import reel.ru.AuthService.model.validation.AccountValidator;
+import reel.ru.AuthService.service.error.FieldRequestError;
+import reel.ru.AuthService.service.error.Reason;
+import reel.ru.AuthService.entity.Account;
+import reel.ru.AuthService.repository.AccountRepository;
+import reel.ru.AuthService.service.parser.GsonFactory;
+import reel.ru.AuthService.service.security.encryption.EncoderFactory;
+import reel.ru.AuthService.service.validation.AccountValidator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 

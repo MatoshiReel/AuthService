@@ -1,6 +1,6 @@
-package reel.ru.AuthService.model.validation;
+package reel.ru.AuthService.service.validation;
 
-import reel.ru.AuthService.model.error.RequestError;
+import reel.ru.AuthService.service.error.RequestError;
 
 /**
  * @param <T> validated object.

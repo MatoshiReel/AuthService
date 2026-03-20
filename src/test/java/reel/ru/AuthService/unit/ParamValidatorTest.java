@@ -5,9 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import reel.ru.AuthService.model.error.ParamRequestError;
-import reel.ru.AuthService.model.error.Reason;
-import reel.ru.AuthService.model.validation.ParamValidator;
+import reel.ru.AuthService.service.error.ParamRequestError;
+import reel.ru.AuthService.service.error.Reason;
+import reel.ru.AuthService.service.validation.ParamValidator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 

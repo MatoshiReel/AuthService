@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.security.token;
+package reel.ru.AuthService.service.security.token;
 
 
 import io.jsonwebtoken.Jwts;

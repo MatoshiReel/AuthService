@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.error;
+package reel.ru.AuthService.service.error;
 
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;

@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.jpa.entity;
+package reel.ru.AuthService.entity;
 
 public class AccountBuilder {
     private String login;

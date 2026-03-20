@@ -1,5 +1,5 @@
-package reel.ru.AuthService.model.validation;
-import reel.ru.AuthService.model.error.RequestError;
+package reel.ru.AuthService.service.validation;
+import reel.ru.AuthService.service.error.RequestError;
 
 /**
  * The {@code SwitchableValidator} provides validation taking

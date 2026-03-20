@@ -1,12 +1,12 @@
-package reel.ru.AuthService.model.validation;
+package reel.ru.AuthService.service.validation;
 
 import org.springframework.stereotype.Component;
-import reel.ru.AuthService.model.error.FieldRequestError;
-import reel.ru.AuthService.model.jpa.entity.Account;
-import reel.ru.AuthService.model.jpa.repository.AccountRepository;
-import reel.ru.AuthService.model.security.encryption.EncoderFactory;
-import reel.ru.AuthService.model.error.ErrorMessageFactory;
-import reel.ru.AuthService.model.error.Reason;
+import reel.ru.AuthService.service.error.FieldRequestError;
+import reel.ru.AuthService.entity.Account;
+import reel.ru.AuthService.repository.AccountRepository;
+import reel.ru.AuthService.service.security.encryption.EncoderFactory;
+import reel.ru.AuthService.service.error.ErrorMessageFactory;
+import reel.ru.AuthService.service.error.Reason;
 
 /**
  * @see SwitchableValidator

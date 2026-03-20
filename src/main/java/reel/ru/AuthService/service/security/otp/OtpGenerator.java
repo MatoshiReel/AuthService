@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.security.otp;
+package reel.ru.AuthService.service.security.otp;
 
 import java.security.SecureRandom;
 

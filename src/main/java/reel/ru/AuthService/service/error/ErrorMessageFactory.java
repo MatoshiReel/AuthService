@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.error;
+package reel.ru.AuthService.service.error;
 
 /**
  * The {@code ErrorMessageFactory} is a factory class, that standardized messages for {@link RequestError} message field.

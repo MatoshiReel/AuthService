@@ -3,8 +3,8 @@ package reel.ru.AuthService.unit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import reel.ru.AuthService.model.security.otp.OtpGenerator;
-import reel.ru.AuthService.model.security.otp.OtpKeyFormatter;
+import reel.ru.AuthService.service.security.otp.OtpGenerator;
+import reel.ru.AuthService.service.security.otp.OtpKeyFormatter;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

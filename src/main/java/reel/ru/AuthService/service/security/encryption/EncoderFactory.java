@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.security.encryption;
+package reel.ru.AuthService.service.security.encryption;
 
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 

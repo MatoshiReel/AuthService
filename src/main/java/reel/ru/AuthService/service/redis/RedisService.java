@@ -1,4 +1,4 @@
-package reel.ru.AuthService.model.redis;
+package reel.ru.AuthService.service.redis;
 
 import jakarta.annotation.PreDestroy;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;

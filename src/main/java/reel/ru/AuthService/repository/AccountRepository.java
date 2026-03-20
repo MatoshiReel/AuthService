@@ -1,8 +1,8 @@
-package reel.ru.AuthService.model.jpa.repository;
+package reel.ru.AuthService.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import reel.ru.AuthService.model.jpa.entity.Account;
+import reel.ru.AuthService.entity.Account;
 
 import java.util.UUID;
 

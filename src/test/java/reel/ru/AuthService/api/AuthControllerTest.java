@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.security.crypto.encrypt.Encryptors;
-import reel.ru.AuthService.model.error.Reason;
-import reel.ru.AuthService.model.jpa.entity.Account;
+import reel.ru.AuthService.service.error.Reason;
+import reel.ru.AuthService.entity.Account;
 
 import javax.crypto.KeyGenerator;
 
@@ -115,7 +115,7 @@ public class AuthControllerTest {
                     .post("/auth/signin")
                     .then()
                     .assertThat()
-                    .statusCode(201);
+                    .statusCode(200);
         }
     }
 

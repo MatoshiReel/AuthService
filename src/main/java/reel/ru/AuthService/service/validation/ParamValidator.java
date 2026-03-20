@@ -1,9 +1,9 @@
-package reel.ru.AuthService.model.validation;
+package reel.ru.AuthService.service.validation;
 
 import org.springframework.stereotype.Component;
-import reel.ru.AuthService.model.error.ErrorMessageFactory;
-import reel.ru.AuthService.model.error.ParamRequestError;
-import reel.ru.AuthService.model.error.Reason;
+import reel.ru.AuthService.service.error.ErrorMessageFactory;
+import reel.ru.AuthService.service.error.ParamRequestError;
+import reel.ru.AuthService.service.error.Reason;
 
 /**
  * @see Validator
