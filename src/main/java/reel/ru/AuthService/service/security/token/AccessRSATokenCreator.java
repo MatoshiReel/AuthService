@@ -14,19 +14,20 @@ import java.util.Base64;
 import java.util.Date;
 
 @Component
-public class RSATokenCreator implements TokenCreator {
+public class AccessRSATokenCreator implements AccessTokenCreator {
     private final PrivateKey privateKey;
 
-    public RSATokenCreator(@Value("${RSA_JWT_PRIVATE_KEY}") String base64PrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public AccessRSATokenCreator(@Value("${RSA_JWT_PRIVATE_KEY}") String base64PrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(base64PrivateKey));
         this.privateKey = keyFactory.generatePrivate(keySpec);
     }
 
     @Override
-    public String create(String id, long expiredTimeMillis) {
+    public String create(String id, String role, long expiredTimeMillis) {
         return Jwts.builder()
                 .subject(id)
+                .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()+expiredTimeMillis))
                 .issuer("reel-server*")

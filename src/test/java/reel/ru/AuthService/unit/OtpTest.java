@@ -33,6 +33,6 @@ public class OtpTest {
     @Test
     @DisplayName("Format OTP key for redis with null parameters.")
     public void otpKeyFormatterWithNullParameters() {
-        assertThrows(NullPointerException.class, () -> {OtpKeyFormatter.format(null, null, null);});
+        assertThrows(NullPointerException.class, () -> OtpKeyFormatter.format(null, null, null));
     }
 }

@@ -22,6 +22,7 @@ All external communication is routed through an API Gateway, where TLS terminati
   - [Internal Structure](#internal-structure)
   - [Environment Variables](#environment-variables)
   - [External Dependencies](#external-dependencies)
+  - [Diagram](#diagram)
 - [Database Schema](#database-schema)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -33,13 +34,14 @@ All external communication is routed through an API Gateway, where TLS terminati
 1. **Web**
     - **Spring Boot Devtools** - Microservice startup and autoconfiguration
     - **Spring Boot Web** - REST API development
+    - **Gson** - DTO serialization and deserialization
 2. **Security**
     - **Spring Security Crypto** - encryption and hashing
     - **Bouncy Castle**
     - **JJWT** - access token creation
     - **Spring Boot Mail** - mail sending
 3. **DataBase Connection**
-    - **Spring Boot Data JPA** - connection to SQL database
+    - **Spring Boot Data JPA** - connection to the major SQL database
     - **PostgreSQL Driver**
     - **Spring Boot Data Redis** - connection to Redis
     - **Jedis**
@@ -48,7 +50,7 @@ All external communication is routed through an API Gateway, where TLS terminati
 5. **API Documentation**
     - **SpringDoc OpenAPI** - automating generation of API documentation
 6. **Testing**
-    - **Spring Boot Test** - Unit testing and integration tests startup
+    - **JUnit5** - Unit testing and integration tests startup
     - **Hamcrest** - simple result assertions
     - **Rest-assured** - API testing
     - **H2** - in-memory database for testing
@@ -65,7 +67,11 @@ with layered structure:
 - **Controller** - handles HTTP requests and responses
 - **Service** - contains business logic
 - **Repository** - manages data persistence
-- **Entity** - represents database models and used for data transfer
+- **Entity** - represents database entities
+- **DTO** - represents data transfer objects
+- **Converter** - converts from DTOs to Entities
+
+<img src="src/main/resources/static/module-structure.png" alt="module-structure" width="300">
 
 ### Environment Variables
 - **SQL Database connection**
@@ -81,17 +87,26 @@ with layered structure:
 - **Mail**
   - **MAIL_USERNAME** - email address used to send messages 
   - **MAIL_PASSWORD** email app password
+- **Logging**
+    - **LOG_PATH** - path to the directory for log files
 
 ### External Dependencies
 - **PostgreSQL** - primary data storage
 - **Redis** - OTP-code storage
 - **Email Service** - sending OTP-codes
 
+### Diagram
+
+<img src="src/main/resources/static/microservice-architecture.png" alt="microservice-architecture" width="400">
+
 [Back to table of contents](#table-of-contents)
 
 ## Database Schema
 
-in progress
+### PostgreSQL
+
+<img src="src/main/resources/static/postgres-schema.png" alt="postgres-schema" width="600">
+
 
 [Back to table of contents](#table-of-contents)
 

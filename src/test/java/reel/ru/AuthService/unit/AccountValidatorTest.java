@@ -6,6 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import reel.ru.AuthService.converter.AccountConverter;
+import reel.ru.AuthService.dto.AccountDto;
 import reel.ru.AuthService.service.error.FieldRequestError;
 import reel.ru.AuthService.service.error.Reason;
 import reel.ru.AuthService.entity.Account;
@@ -22,19 +24,23 @@ public class AccountValidatorTest {
     private AccountValidator validator;
     @Autowired
     private GsonFactory gsonFactory;
-    private static Account testAccount;
+    private static AccountDto testAccount;
     private static final String testAccountPassword = "123456";
 
     @BeforeAll
-    static void setup(@Autowired AccountRepository accountRepository) {
-        testAccount = Account.builder().login("TestLogin").password(EncoderFactory.getArgon2Encoder().encode(testAccountPassword)).build();
-        accountRepository.save(testAccount);
+    static void setup(@Autowired AccountRepository accountRepository, @Autowired AccountConverter accountConverter) {
+        testAccount = new AccountDto();
+        testAccount.login = "TestLogin";
+        testAccount.password = EncoderFactory.getArgon2Encoder().encode(testAccountPassword);
+        Account account = accountConverter.convert(testAccount);
+        accountRepository.save(account);
     }
 
     @Test
     @DisplayName("Validate account with null login.")
     public void validateAccountWithNullLogin() {
-        Account account = Account.builder().login(null).build();
+        AccountDto account = new AccountDto();
+        account.login = null;
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.EMPTY));
@@ -44,7 +50,8 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with invalid pattern of login.")
     public void validateAccountWithInvalidPatternOfLogin() {
-        Account account = Account.builder().login(" Lo-gin&^%$").build();
+        AccountDto account = new AccountDto();
+        account.login = " Lo-gin&^%$";
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.PATTERN));
@@ -57,7 +64,8 @@ public class AccountValidatorTest {
         StringBuilder login = new StringBuilder();
         for(int i = 0; i < AccountValidator.LOGIN_MIN_SIZE-1; i++)
             login.append(i);
-        Account account = Account.builder().login(login.toString()).build();
+        AccountDto account = new AccountDto();
+        account.login = login.toString();
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.LESS_SIZE));
@@ -70,7 +78,8 @@ public class AccountValidatorTest {
         StringBuilder login = new StringBuilder();
         for(int i = 0; i <= AccountValidator.LOGIN_MAX_SIZE; i++)
             login.append(i);
-        Account account = Account.builder().login(login.toString()).build();
+        AccountDto account = new AccountDto();
+        account.login = login.toString();
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.GREATER_SIZE));
@@ -80,7 +89,9 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login and null password.")
     public void validateAccountWithNullPassword() {
-        Account account = Account.builder().login("12345").password(null).build();
+        AccountDto account = new AccountDto();
+        account.login = "12345";
+        account.password = null;
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.EMPTY));
@@ -90,7 +101,9 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login and invalid pattern of login.")
     public void validateAccountWithInvalidPatternOfPassword() {
-        Account account = Account.builder().login("12345").password(" 24Lo-gin&^%$  _").build();
+        AccountDto account = new AccountDto();
+        account.login = "12345";
+        account.password = " 24Lo-gin&^%$  _";
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.PATTERN));
@@ -103,7 +116,9 @@ public class AccountValidatorTest {
         StringBuilder password = new StringBuilder();
         for(int i = 0; i < AccountValidator.PASSWORD_MIN_SIZE-1; i++)
             password.append(i);
-        Account account = Account.builder().login("12345").password(password.toString()).build();
+        AccountDto account = new AccountDto();
+        account.login = "12345";
+        account.password = password.toString();
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.LESS_SIZE));
@@ -116,7 +131,9 @@ public class AccountValidatorTest {
         StringBuilder password = new StringBuilder();
         for(int i = 0; i <= AccountValidator.PASSWORD_MAX_SIZE; i++)
             password.append(i);
-        Account account = Account.builder().login("12345").password(password.toString()).build();
+        AccountDto account = new AccountDto();
+        account.login = "12345";
+        account.password = password.toString();
         FieldRequestError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.GREATER_SIZE));
@@ -126,8 +143,10 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login, valid password and null repeated password for sign up mode.")
     public void validateAccountWithNullRepeatedPasswordForSignUpMode() {
-        String json = "{\"login\":\"12345\",\"password\":\"1234567890\",\"repeatedPassword\":null}";
-        Account account = gsonFactory.get().fromJson(json, Account.class);
+        AccountDto account = new AccountDto();
+        account.login = "12345";
+        account.password = "1234567890";
+        account.repeatedPassword = null;
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.EMPTY));
@@ -137,8 +156,10 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login, valid password and not matched repeated password for sign up mode.")
     public void validateAccountWithNotMatchRepeatedPasswordForSignUpMode() {
-        String json = "{\"login\":\"12345\",\"password\":\"1234567890\",\"repeatedPassword\":\"0987654321\"}";
-        Account account = gsonFactory.get().fromJson(json, Account.class);
+        AccountDto account = new AccountDto();
+        account.login = "12345";
+        account.password = "1234567890";
+        account.repeatedPassword = "0987654321";
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_MATCH));
@@ -148,8 +169,10 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login, valid password and valid repeated password, but existing login for sign up mode.")
     public void validateAccountWithExistingLoginForSignUpMode() {
-        String json = String.format("{\"login\":\"%s\",\"password\":\"%s\",\"repeatedPassword\":\"%s\"}", testAccount.getLogin(), testAccountPassword, testAccountPassword);
-        Account account = gsonFactory.get().fromJson(json, Account.class);
+        AccountDto account = new AccountDto();
+        account.login = testAccount.login;
+        account.password = testAccountPassword;
+        account.repeatedPassword = testAccountPassword;
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.EXISTS));
@@ -159,8 +182,10 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login, valid password and valid repeated password for sign up mode.")
     public void validateAccountWithValidParametersForSignUpMode() {
-        String json = String.format("{\"login\":\"%s\",\"password\":\"%s\",\"repeatedPassword\":\"%s\"}", String.format("%Sasdfb", testAccount.getLogin()), testAccountPassword, testAccountPassword);
-        Account account = gsonFactory.get().fromJson(json, Account.class);
+        AccountDto account = new AccountDto();
+        account.login = String.format("%Sasdfb", testAccount.login);
+        account.password = testAccountPassword;
+        account.repeatedPassword = testAccountPassword;
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.nullValue());
     }
@@ -168,7 +193,9 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login and valid password, but login not exists for sign in mode.")
     public void validateAccountWithNotExistingLoginForSignInMode() {
-        Account account = Account.builder().login(String.format("%Sasdfb", testAccount.getLogin())).password(testAccountPassword).build();
+        AccountDto account = new AccountDto();
+        account.login = String.format("%Sasdfb", testAccount.login);
+        account.password = testAccountPassword;
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_EXISTS));
@@ -178,7 +205,9 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login and valid password, but not matched password for sign in mode.")
     public void validateAccountWithNotMatchedPasswordForSignInMode() {
-        Account account = Account.builder().login(testAccount.getLogin()).password(String.format("%Sasdfb", testAccountPassword)).build();
+        AccountDto account = new AccountDto();
+        account.login = testAccount.login;
+        account.password = String.format("%Sasdfb", testAccountPassword);
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.notNullValue());
         assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_MATCH));
@@ -188,7 +217,9 @@ public class AccountValidatorTest {
     @Test
     @DisplayName("Validate account with valid login and valid password for sign in mode.")
     public void validateAccountWithValidParametersForSignInMode() {
-        Account account = Account.builder().login(testAccount.getLogin()).password(testAccountPassword).build();
+        AccountDto account = new AccountDto();
+        account.login = testAccount.login;
+        account.password = testAccountPassword;
         FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.nullValue());
     }

@@ -3,12 +3,14 @@ package reel.ru.AuthService.api;
 import io.restassured.RestAssured;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.security.crypto.encrypt.Encryptors;
+import reel.ru.AuthService.entity.Role;
+import reel.ru.AuthService.repository.RoleRepository;
 import reel.ru.AuthService.service.error.Reason;
-import reel.ru.AuthService.entity.Account;
 
 import javax.crypto.KeyGenerator;
 
@@ -28,7 +30,8 @@ public class AuthControllerTest {
     private static final String testPassword = "123456";
 
     @BeforeAll
-    static void setup() {
+    static void setup(@Autowired RoleRepository roleRepository) {
+        roleRepository.save(new Role("USER"));
         RestAssured.baseURI = "http://127.0.0.1";
     }
 
@@ -90,9 +93,10 @@ public class AuthControllerTest {
         @Tag("auth/signin")
         @DisplayName("POST request /auth/signin with BAD JSON VALIDATING data in the body.")
         void sendPostAuthSignInRequestWithBadValidatingDataBody() {
-            Account account = Account.builder().login("ab").password("12").build();
+            String login = "ab";
+            String password = "12";
             given()
-                    .body(Encryptors.delux(secretKeyAES, saltAES).encrypt(String.format("{\"login\":\"%s\", \"password\":\"%s\"}", account.getLogin(), account.getPassword())))
+                    .body(Encryptors.delux(secretKeyAES, saltAES).encrypt(String.format("{\"login\":\"%s\", \"password\":\"%s\"}", login, password)))
                     .when()
                     .port(port)
                     .post("/auth/signin")
@@ -115,6 +119,7 @@ public class AuthControllerTest {
                     .post("/auth/signin")
                     .then()
                     .assertThat()
+                    .log().body()
                     .statusCode(200);
         }
     }
@@ -176,9 +181,10 @@ public class AuthControllerTest {
         @Tag("auth/signup")
         @DisplayName("POST request /auth/signup with BAD JSON VALIDATING data in the body.")
         void sendPostAuthSignUpRequestWithBadValidatingDataBody() {
-            Account account = Account.builder().login("ab").password("12").build();
+            String login = "ab";
+            String password = "12";
             given()
-                    .body(Encryptors.delux(secretKeyAES, saltAES).encrypt(String.format("{\"login\":\"%s\", \"password\":\"%s\"}", account.getLogin(), account.getPassword())))
+                    .body(Encryptors.delux(secretKeyAES, saltAES).encrypt(String.format("{\"login\":\"%s\", \"password\":\"%s\"}", login, password)))
                     .when()
                     .port(port)
                     .post("/auth/signup")

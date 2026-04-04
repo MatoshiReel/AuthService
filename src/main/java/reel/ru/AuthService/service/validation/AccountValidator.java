@@ -1,6 +1,7 @@
 package reel.ru.AuthService.service.validation;
 
 import org.springframework.stereotype.Component;
+import reel.ru.AuthService.dto.AccountDto;
 import reel.ru.AuthService.service.error.FieldRequestError;
 import reel.ru.AuthService.entity.Account;
 import reel.ru.AuthService.repository.AccountRepository;
@@ -12,7 +13,7 @@ import reel.ru.AuthService.service.error.Reason;
  * @see SwitchableValidator
  */
 @Component
-public class AccountValidator implements SwitchableValidator<Account, AccountValidator.Mode, FieldRequestError> {
+public class AccountValidator implements SwitchableValidator<AccountDto, AccountValidator.Mode, FieldRequestError> {
     private final AccountRepository accountRepository;
     public static final int LOGIN_MAX_SIZE = 35;
     public static final int LOGIN_MIN_SIZE = 3;
@@ -26,13 +27,13 @@ public class AccountValidator implements SwitchableValidator<Account, AccountVal
     }
 
     @Override
-    public FieldRequestError validate(Account account, Mode mode) {
+    public FieldRequestError validate(AccountDto accountDto, Mode mode) {
         FieldRequestError fieldRequestError;
-        fieldRequestError = this.validateLogin(account.getLogin());
-        if(fieldRequestError == null) fieldRequestError = this.validatePassword(account.getPassword());
-        if(fieldRequestError == null && mode == Mode.SIGN_UP) fieldRequestError = this.validateRepeatedPassword(account.getPassword(), account.getRepeatedPassword());
-        if(fieldRequestError == null) fieldRequestError = this.validateLoginExisting(account.getLogin(), mode);
-        if(fieldRequestError == null && mode == Mode.SIGN_IN) fieldRequestError = this.validatePasswordMatching(account.getLogin(), account.getPassword());
+        fieldRequestError = this.validateLogin(accountDto.login);
+        if(fieldRequestError == null) fieldRequestError = this.validatePassword(accountDto.password);
+        if(fieldRequestError == null && mode == Mode.SIGN_UP) fieldRequestError = this.validateRepeatedPassword(accountDto.password, accountDto.repeatedPassword);
+        if(fieldRequestError == null) fieldRequestError = this.validateLoginExisting(accountDto.login, mode);
+        if(fieldRequestError == null && mode == Mode.SIGN_IN) fieldRequestError = this.validatePasswordMatching(accountDto.login, accountDto.password);
         return fieldRequestError;
     }
 
