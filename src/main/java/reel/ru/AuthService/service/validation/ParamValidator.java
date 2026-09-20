@@ -1,19 +1,22 @@
 package reel.ru.AuthService.service.validation;
 
 import org.springframework.stereotype.Component;
-import reel.ru.AuthService.service.error.ErrorMessageFactory;
-import reel.ru.AuthService.service.error.ParamRequestError;
-import reel.ru.AuthService.service.error.Reason;
+import ru.reel.request.error.RequestParamError;
+import ru.reel.request.error.reason.ErrorReason;
 
 /**
  * @see Validator
  */
 @Component
-public class ParamValidator<T> implements Validator<T, ParamRequestError> {
+public class ParamValidator<T> implements Validator<T, RequestParamError> {
     @Override
-    public ParamRequestError validate(T param, String paramName) {
+    public RequestParamError validate(T param, String paramName) {
         if(isEmpty(param)) {
-            return ParamRequestError.builder().param(paramName).reason(Reason.EMPTY).message(String.format(ErrorMessageFactory.get(Reason.EMPTY), paramName)).build();
+            return RequestParamError.builder()
+                                    .param(paramName)
+                                    .errorReason(ErrorReason.EMPTY)
+                                    .message(paramName)
+                                    .build();
         }
         return null;
     }

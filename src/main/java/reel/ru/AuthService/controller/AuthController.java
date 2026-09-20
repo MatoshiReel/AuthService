@@ -26,7 +26,6 @@ import reel.ru.AuthService.converter.AccountConverter;
 import reel.ru.AuthService.dto.AccountDto;
 import reel.ru.AuthService.port.messaging.producer.UserRegisteredEventPublisher;
 import reel.ru.AuthService.repository.RoleRepository;
-import reel.ru.AuthService.service.error.*;
 import reel.ru.AuthService.entity.Account;
 import reel.ru.AuthService.repository.AccountRepository;
 import reel.ru.AuthService.service.security.otp.OtpGenerator;
@@ -35,6 +34,10 @@ import reel.ru.AuthService.service.security.otp.OtpMailSender;
 import reel.ru.AuthService.service.security.token.AccessTokenCreator;
 import reel.ru.AuthService.service.validation.AccountValidator;
 import reel.ru.AuthService.service.validation.ParamValidator;
+import ru.reel.request.error.RequestError;
+import ru.reel.request.error.RequestFieldError;
+import ru.reel.request.error.RequestParamError;
+import ru.reel.request.error.reason.ErrorReason;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -76,14 +79,14 @@ public class AuthController {
     @Operation(summary = "Register a new user", description = "Creates a new user account using login, password and repeatedPassword")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Success sign up", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, examples = {@ExampleObject(value = "Bearer Access Token")})),
-            @ApiResponse(responseCode = "400", description = "Invalid request body data", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(oneOf = {FieldRequestError.class, RequestError.class}))),
+            @ApiResponse(responseCode = "400", description = "Invalid request body data", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(oneOf = {RequestFieldError.class, RequestError.class}))),
             @ApiResponse(responseCode = "500", content = @Content)
     })
     @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Object> signUp(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Account data, which consists login, password and repeatedPassword fields")
                                               @RequestBody(required = false) AccountDto accountDto, @Parameter(hidden = true) AccountConverter accountConverter) {
         if(accountDto == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RequestError.builder().reason(Reason.EMPTY).message(ErrorMessageFactory.get(Reason.EMPTY)).build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RequestError.builder().errorReason(ErrorReason.EMPTY).message("body").build());
         }
         /*AccountDto accountDto;
         if(encryptedAccountData == null) {
@@ -101,7 +104,7 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(RequestError.builder().reason(Reason.JSON_FORMAT).message(ErrorMessageFactory.get(Reason.JSON_FORMAT)).build());
             }
         }*/
-        FieldRequestError error = accountValidator.validate(accountDto, AccountValidator.Mode.SIGN_UP);
+        RequestFieldError error = accountValidator.validate(accountDto, AccountValidator.Mode.SIGN_UP);
         if(error != null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         Account account = accountConverter.convert(accountDto);
@@ -117,14 +120,14 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success sign in", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, examples = {@ExampleObject(value = "Bearer Access Token")})),
             @ApiResponse(responseCode = "202", description = "If account has 2FA by email", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, examples = @ExampleObject("email"))),
-            @ApiResponse(responseCode = "400", description = "Invalid request body data", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(oneOf = {FieldRequestError.class, RequestError.class}))),
+            @ApiResponse(responseCode = "400", description = "Invalid request body data", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(oneOf = {RequestFieldError.class, RequestError.class}))),
             @ApiResponse(responseCode = "500", content = @Content)
     })
     @PostMapping(value = "/signin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Object> signIn(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Account data, which consists login and password fields")
                                               @RequestBody(required = false) AccountDto accountDto) {
         if(accountDto == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RequestError.builder().reason(Reason.EMPTY).message(ErrorMessageFactory.get(Reason.EMPTY)).build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RequestError.builder().errorReason(ErrorReason.EMPTY).message("body").build());
         }
         /*AccountDto accountDto;
         if(encryptedAccountData == null) {
@@ -142,7 +145,7 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(RequestError.builder().reason(Reason.JSON_FORMAT).message(ErrorMessageFactory.get(Reason.JSON_FORMAT)).build());
             }
         }*/
-        FieldRequestError error = accountValidator.validate(accountDto, AccountValidator.Mode.SIGN_IN);
+        RequestFieldError error = accountValidator.validate(accountDto, AccountValidator.Mode.SIGN_IN);
         if(error != null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         Account savedAccount = accountRepository.findByLogin(accountDto.login);
@@ -167,13 +170,13 @@ public class AuthController {
     @Operation(summary = "Verify an user by email", description = "Give access for an user by OTP-code, which was sent on user's email, when he made a sign in, if he has 2FA varification enabled")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Success OTP verification", content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE, examples = {@ExampleObject(value = "Bearer Access Token")})),
-            @ApiResponse(responseCode = "400", description = "Invalid query params", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ParamRequestError.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid query params", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RequestParamError.class))),
             @ApiResponse(responseCode = "403", description = "All Attempts were used and OTP doesn't exist more", content = @Content),
             @ApiResponse(responseCode = "500", content = @Content)
     })
     @PostMapping(value = "/otp/verify", produces = MediaType.APPLICATION_JSON_VALUE)
     private ResponseEntity<Object> otpVerify(@RequestParam(value = "email", required = false) String email, @RequestParam(value = "otp", required = false) String otp, @Parameter(hidden = true) ParamValidator<String> paramValidator) {
-        ParamRequestError error = paramValidator.validate(email, "email");
+        RequestParamError error = paramValidator.validate(email, "email");
         if(error == null) error = paramValidator.validate(otp, "otp");
         if(error != null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         String attempts = redisOperations.opsForValue().get(OtpKeyFormatter.formatForAttempts(email, OtpKeyFormatter.OtpType.EMAIL, OtpKeyFormatter.OtpPurposeType.SIGN_IN));
@@ -185,7 +188,7 @@ public class AuthController {
         String savedOtp = redisOperations.opsForValue().get(OtpKeyFormatter.format(email, OtpKeyFormatter.OtpType.EMAIL, OtpKeyFormatter.OtpPurposeType.SIGN_IN));
         if(!argon2PasswordEncoder.matches(otp, savedOtp)) {
             redisOperations.opsForValue().increment(OtpKeyFormatter.formatForAttempts(email, OtpKeyFormatter.OtpType.EMAIL, OtpKeyFormatter.OtpPurposeType.SIGN_IN));
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ParamRequestError.builder().param("otp").reason(Reason.NOT_MATCH).message(String.format(ErrorMessageFactory.get(Reason.NOT_MATCH), "otp")).build());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(RequestParamError.builder().param("otp").errorReason(ErrorReason.NOT_MATCH).message("otp").build());
         } else {
             redisOperations.delete(OtpKeyFormatter.format(email, OtpKeyFormatter.OtpType.EMAIL, OtpKeyFormatter.OtpPurposeType.SIGN_IN));
             redisOperations.delete(OtpKeyFormatter.formatForAttempts(email, OtpKeyFormatter.OtpType.EMAIL, OtpKeyFormatter.OtpPurposeType.SIGN_IN));

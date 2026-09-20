@@ -1,11 +1,10 @@
 package reel.ru.AuthService.service.validation;
 
-import reel.ru.AuthService.service.error.RequestError;
+import ru.reel.request.error.RequestError;
 
 /**
  * @param <T> validated object.
  * @param <R> returned error type {@link RequestError}, not null if an error was detected during validation process.
- * @see RequestError
  */
 public interface Validator<T, R extends RequestError> {
     R validate(T obj, String objName);

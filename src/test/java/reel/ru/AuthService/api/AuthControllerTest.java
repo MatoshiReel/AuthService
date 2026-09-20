@@ -10,7 +10,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import reel.ru.AuthService.entity.Role;
 import reel.ru.AuthService.repository.RoleRepository;
-import reel.ru.AuthService.service.error.Reason;
+import ru.reel.request.error.reason.ErrorReason;
 
 import javax.crypto.KeyGenerator;
 
@@ -67,7 +67,7 @@ public class AuthControllerTest {
                     .assertThat()
                     .statusCode(400)
                     .assertThat()
-                    .body("reason", Matchers.equalTo(Reason.DECRYPTION.name()));
+                    .body("reason", Matchers.equalTo(ErrorReason.ENCRYPTION.name()));
         }
 
         @Test
@@ -84,7 +84,7 @@ public class AuthControllerTest {
                     .assertThat()
                     .statusCode(400)
                     .assertThat()
-                    .body("reason", Matchers.equalTo(Reason.JSON_FORMAT.name()));
+                    .body("reason", Matchers.equalTo(ErrorReason.JSON_FORMAT.name()));
         }
 
         @Test
@@ -155,7 +155,7 @@ public class AuthControllerTest {
                     .assertThat()
                     .statusCode(400)
                     .assertThat()
-                    .body("reason", Matchers.equalTo(Reason.DECRYPTION.name()));
+                    .body("reason", Matchers.equalTo(ErrorReason.ENCRYPTION.name()));
         }
 
         @Test
@@ -172,7 +172,7 @@ public class AuthControllerTest {
                     .assertThat()
                     .statusCode(400)
                     .assertThat()
-                    .body("reason", Matchers.equalTo(Reason.JSON_FORMAT.name()));
+                    .body("reason", Matchers.equalTo(ErrorReason.JSON_FORMAT.name()));
         }
 
         @Test
@@ -231,7 +231,7 @@ public class AuthControllerTest {
                     .assertThat()
                     .body("param", Matchers.notNullValue())
                     .body("param", Matchers.equalTo("email"))
-                    .body("reason", Matchers.equalTo(Reason.EMPTY.name()));
+                    .body("reason", Matchers.equalTo(ErrorReason.EMPTY.name()));
         }
 
         @Test
@@ -250,7 +250,7 @@ public class AuthControllerTest {
                     .assertThat()
                     .body("param", Matchers.notNullValue())
                     .body("param", Matchers.equalTo("otp"))
-                    .body("reason", Matchers.equalTo(Reason.EMPTY.name()));
+                    .body("reason", Matchers.equalTo(ErrorReason.EMPTY.name()));
         }
 
         @Test

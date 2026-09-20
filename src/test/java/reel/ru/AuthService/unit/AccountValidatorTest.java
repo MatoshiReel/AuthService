@@ -1,6 +1,5 @@
 package reel.ru.AuthService.unit;
 
-import com.google.gson.Gson;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -10,11 +9,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import reel.ru.AuthService.converter.AccountConverter;
 import reel.ru.AuthService.dto.AccountDto;
-import reel.ru.AuthService.service.error.FieldRequestError;
-import reel.ru.AuthService.service.error.Reason;
 import reel.ru.AuthService.entity.Account;
 import reel.ru.AuthService.repository.AccountRepository;
 import reel.ru.AuthService.service.validation.AccountValidator;
+import ru.reel.request.error.RequestFieldError;
+import ru.reel.request.error.reason.ErrorReason;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -39,9 +38,9 @@ public class AccountValidatorTest {
     public void validateAccountWithNullLogin() {
         AccountDto account = new AccountDto();
         account.login = null;
-        FieldRequestError error = validator.validate(account, null);
+        RequestFieldError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.EMPTY));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.EMPTY));
         assertThat(error.getField(), Matchers.equalTo("login"));
     }
 
@@ -50,9 +49,9 @@ public class AccountValidatorTest {
     public void validateAccountWithInvalidPatternOfLogin() {
         AccountDto account = new AccountDto();
         account.login = " Lo-gin&^%$";
-        FieldRequestError error = validator.validate(account, null);
+        RequestFieldError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.PATTERN));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.PATTERN));
         assertThat(error.getField(), Matchers.equalTo("login"));
     }
 
@@ -64,9 +63,9 @@ public class AccountValidatorTest {
             login.append(i);
         AccountDto account = new AccountDto();
         account.login = login.toString();
-        FieldRequestError error = validator.validate(account, null);
+        RequestFieldError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.LESS_SIZE));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.LESS_SIZE));
         assertThat(error.getField(), Matchers.equalTo("login"));
     }
 
@@ -78,9 +77,9 @@ public class AccountValidatorTest {
             login.append(i);
         AccountDto account = new AccountDto();
         account.login = login.toString();
-        FieldRequestError error = validator.validate(account, null);
+        RequestFieldError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.GREATER_SIZE));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.GREATER_SIZE));
         assertThat(error.getField(), Matchers.equalTo("login"));
     }
 
@@ -90,9 +89,9 @@ public class AccountValidatorTest {
         AccountDto account = new AccountDto();
         account.login = "12345";
         account.password = null;
-        FieldRequestError error = validator.validate(account, null);
+        RequestFieldError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.EMPTY));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.EMPTY));
         assertThat(error.getField(), Matchers.equalTo("password"));
     }
 
@@ -102,9 +101,9 @@ public class AccountValidatorTest {
         AccountDto account = new AccountDto();
         account.login = "12345";
         account.password = " 24Lo-gin&^%$  _";
-        FieldRequestError error = validator.validate(account, null);
+        RequestFieldError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.PATTERN));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.PATTERN));
         assertThat(error.getField(), Matchers.equalTo("password"));
     }
 
@@ -117,9 +116,9 @@ public class AccountValidatorTest {
         AccountDto account = new AccountDto();
         account.login = "12345";
         account.password = password.toString();
-        FieldRequestError error = validator.validate(account, null);
+        RequestFieldError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.LESS_SIZE));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.LESS_SIZE));
         assertThat(error.getField(), Matchers.equalTo("password"));
     }
 
@@ -132,9 +131,9 @@ public class AccountValidatorTest {
         AccountDto account = new AccountDto();
         account.login = "12345";
         account.password = password.toString();
-        FieldRequestError error = validator.validate(account, null);
+        RequestFieldError error = validator.validate(account, null);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.GREATER_SIZE));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.GREATER_SIZE));
         assertThat(error.getField(), Matchers.equalTo("password"));
     }
 
@@ -145,9 +144,9 @@ public class AccountValidatorTest {
         account.login = "12345";
         account.password = "1234567890";
         account.repeatedPassword = null;
-        FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
+        RequestFieldError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.EMPTY));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.EMPTY));
         assertThat(error.getField(), Matchers.equalTo("repeatedPassword"));
     }
 
@@ -158,9 +157,9 @@ public class AccountValidatorTest {
         account.login = "12345";
         account.password = "1234567890";
         account.repeatedPassword = "0987654321";
-        FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
+        RequestFieldError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_MATCH));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.NOT_MATCH));
         assertThat(error.getField(), Matchers.equalTo("repeatedPassword"));
     }
 
@@ -171,9 +170,9 @@ public class AccountValidatorTest {
         account.login = testAccount.login;
         account.password = testAccountPassword;
         account.repeatedPassword = testAccountPassword;
-        FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
+        RequestFieldError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.EXISTS));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.EXIST));
         assertThat(error.getField(), Matchers.equalTo("login"));
     }
 
@@ -184,7 +183,7 @@ public class AccountValidatorTest {
         account.login = String.format("%Sasdfb", testAccount.login);
         account.password = testAccountPassword;
         account.repeatedPassword = testAccountPassword;
-        FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
+        RequestFieldError error = validator.validate(account, AccountValidator.Mode.SIGN_UP);
         assertThat(error, Matchers.nullValue());
     }
 
@@ -194,9 +193,9 @@ public class AccountValidatorTest {
         AccountDto account = new AccountDto();
         account.login = String.format("%Sasdfb", testAccount.login);
         account.password = testAccountPassword;
-        FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
+        RequestFieldError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_EXISTS));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.NOT_EXIST));
         assertThat(error.getField(), Matchers.equalTo("login"));
     }
 
@@ -206,9 +205,9 @@ public class AccountValidatorTest {
         AccountDto account = new AccountDto();
         account.login = testAccount.login;
         account.password = String.format("%Sasdfb", testAccountPassword);
-        FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
+        RequestFieldError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.notNullValue());
-        assertThat(error.getReason(), Matchers.equalTo(Reason.NOT_MATCH));
+        assertThat(error.getErrorReason(), Matchers.equalTo(ErrorReason.NOT_MATCH));
         assertThat(error.getField(), Matchers.equalTo("password"));
     }
 
@@ -218,7 +217,7 @@ public class AccountValidatorTest {
         AccountDto account = new AccountDto();
         account.login = testAccount.login;
         account.password = testAccountPassword;
-        FieldRequestError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
+        RequestFieldError error = validator.validate(account, AccountValidator.Mode.SIGN_IN);
         assertThat(error, Matchers.nullValue());
     }
 }

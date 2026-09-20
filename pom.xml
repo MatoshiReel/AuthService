@@ -76,6 +76,11 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>ru.reel</groupId>
+			<artifactId>response-body-issue</artifactId>
+			<version>1.1</version>
+		</dependency>
 
 		<!-- Mail -->
 		<dependency>
