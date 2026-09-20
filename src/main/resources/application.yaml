@@ -12,15 +12,10 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: ${DB_DRIVER}
-
   jpa:
     open-in-view: false
-    show-sql: true
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
 
   mail:
     host: smtp.gmail.com
@@ -31,3 +26,6 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+
+  Kafka:
+    bootstrap-servers: "localhost:9092"

@@ -83,7 +83,6 @@ public class AuthControllerTest {
                     .then()
                     .assertThat()
                     .statusCode(400)
-                    .log().body()
                     .assertThat()
                     .body("reason", Matchers.equalTo(Reason.JSON_FORMAT.name()));
         }

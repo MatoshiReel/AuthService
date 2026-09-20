@@ -1,19 +1,19 @@
 package reel.ru.AuthService.unit;
 
+import com.google.gson.Gson;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import reel.ru.AuthService.converter.AccountConverter;
 import reel.ru.AuthService.dto.AccountDto;
 import reel.ru.AuthService.service.error.FieldRequestError;
 import reel.ru.AuthService.service.error.Reason;
 import reel.ru.AuthService.entity.Account;
 import reel.ru.AuthService.repository.AccountRepository;
-import reel.ru.AuthService.service.parser.GsonFactory;
-import reel.ru.AuthService.service.security.encryption.EncoderFactory;
 import reel.ru.AuthService.service.validation.AccountValidator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -22,16 +22,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class AccountValidatorTest {
     @Autowired
     private AccountValidator validator;
-    @Autowired
-    private GsonFactory gsonFactory;
     private static AccountDto testAccount;
     private static final String testAccountPassword = "123456";
 
     @BeforeAll
-    static void setup(@Autowired AccountRepository accountRepository, @Autowired AccountConverter accountConverter) {
+    static void setup(@Autowired AccountRepository accountRepository, @Autowired AccountConverter accountConverter, @Autowired Argon2PasswordEncoder argon2PasswordEncoder) {
         testAccount = new AccountDto();
         testAccount.login = "TestLogin";
-        testAccount.password = EncoderFactory.getArgon2Encoder().encode(testAccountPassword);
+        testAccount.password = argon2PasswordEncoder.encode(testAccountPassword);
         Account account = accountConverter.convert(testAccount);
         accountRepository.save(account);
     }

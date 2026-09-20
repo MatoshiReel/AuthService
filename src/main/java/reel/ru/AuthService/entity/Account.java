@@ -18,7 +18,7 @@ public class Account {
     private UUID id;
 
     @Setter
-    @Column(name="login", nullable = false, unique = true, length=35)
+    @Column(name="login", nullable = false, unique = true, length=20)
     private String login;
 
     @Setter

@@ -1,11 +1,11 @@
 package reel.ru.AuthService.service.validation;
 
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Component;
 import reel.ru.AuthService.dto.AccountDto;
 import reel.ru.AuthService.service.error.FieldRequestError;
 import reel.ru.AuthService.entity.Account;
 import reel.ru.AuthService.repository.AccountRepository;
-import reel.ru.AuthService.service.security.encryption.EncoderFactory;
 import reel.ru.AuthService.service.error.ErrorMessageFactory;
 import reel.ru.AuthService.service.error.Reason;
 
@@ -15,15 +15,17 @@ import reel.ru.AuthService.service.error.Reason;
 @Component
 public class AccountValidator implements SwitchableValidator<AccountDto, AccountValidator.Mode, FieldRequestError> {
     private final AccountRepository accountRepository;
-    public static final int LOGIN_MAX_SIZE = 35;
+    private final Argon2PasswordEncoder argon2PasswordEncoder;
+    public static final int LOGIN_MAX_SIZE = 20;
     public static final int LOGIN_MIN_SIZE = 3;
     public static final int PASSWORD_MAX_SIZE = 24;
     public static final int PASSWORD_MIN_SIZE = 6;
     public static final String allowLoginCharacters = "a-z A-Z 0-9 _";
     public static final String allowPasswordCharacters = "a-z A-Z 0-9 _ ! @ # $ % ^ & * ( ) - + =";
 
-    public AccountValidator(AccountRepository accountRepository) {
+    public AccountValidator(AccountRepository accountRepository, Argon2PasswordEncoder argon2PasswordEncoder) {
         this.accountRepository = accountRepository;
+        this.argon2PasswordEncoder = argon2PasswordEncoder;
     }
 
     @Override
@@ -73,7 +75,7 @@ public class AccountValidator implements SwitchableValidator<AccountDto, Account
     public boolean isPasswordMatches(String login, String password) {
         Account account = accountRepository.findByLogin(login);
         if(account == null) return false;
-        return EncoderFactory.getArgon2Encoder().matches(password, account.getPassword());
+        return argon2PasswordEncoder.matches(password, account.getPassword());
     }
 
     public enum Field {
